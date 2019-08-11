@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Gafy Resolve</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    selectionner le disque
+    <select id="drives">
+        {% for drive in drives %}
+        {% if drive == current_drive %}
+        <option value="{{ drive }}" selected>{{ drive }}</option>
+        {% else %}
+        <option value="{{ drive }}">{{ drive }}</option>
+        {% endif %}
+        {% endfor %}
+    </select>
+    <br>
+
+    <div id="isCrypted">
+        <span>Nombre de fichiers cryptés dans </span><span id="selectedDrive">{{ current_drive }}</span>
+        <span id="cryptedFilesLength">{{ crypted_files_length }}</span>
+    </div>
+    CPUID : {{ cpuID }}
+    <br>
+    entrer la clé de décryptage : <input type="text" name="key" id="key"><br>
+    <br>
+    <button id="process">Décrypter</button>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'js/axios.min.js') }}"></script>
+    <script>
+
+        var drivesDropdown = document.getElementById("drives");
+        var processButton = document.getElementById('process')
+        
+        allDrives = [];
+        for (let i = 0; i < drivesDropdown.options.length; i++) {
+            const element = drives.options[i].value;
+            allDrives.push(element)
+        }
+        drivesDropdown.selectedIndex = allDrives.indexOf("{{ current_drive }}")
+        
+        processButton.addEventListener('click', function () {
+            var selectedDrive = drivesDropdown.options[drivesDropdown.selectedIndex].value;
+            var keyValue = document.getElementById("key").value;
+
+            axios.post('/decrypt', {
+                drive: selectedDrive,
+                key: keyValue
+            })
+                .then(function (response) {
+                    console.log(response)
+                })
+        })
+
+        drivesDropdown.addEventListener('change', function (e) {
+            var currentSelectedValue = e.target.options[e.target.selectedIndex].value;
+
+            axios.post('/changeSelectedDrive', {
+                drive: currentSelectedValue
+            })
+                .then(function (response) {
+                    var cryptedFilesLengthResponse = response.data.crypted_files_length
+                    var isCryptedDiv = document.getElementById('isCrypted')
+                    var selectedDriveSpan = document.getElementById('selectedDrive')
+                    var cryptedFilesLengthSpan = document.getElementById('cryptedFilesLength')
+
+                    selectedDriveSpan.innerText = currentSelectedValue
+                    cryptedFilesLengthSpan.innerText = cryptedFilesLengthResponse
+                })
+        })
+
+    </script>
+</body>
+
+</html>

